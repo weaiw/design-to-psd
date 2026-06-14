@@ -161,7 +161,10 @@ const psd = {
   width: manifest.width,
   height: manifest.height,
   imageData: composite,
-  children: manifest.layers.map(buildLayer),
+  // ag-psd writes children in the opposite order from the layer panel order
+  // users expect in Photoshop/Photopea. Keep manifest order top-to-bottom and
+  // reverse only at PSD serialization time.
+  children: manifest.layers.map(buildLayer).reverse(),
 };
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });

@@ -35,7 +35,7 @@ Minimal shape:
 }
 ```
 
-Layer order is top-to-bottom as it should appear in Photoshop. Preview composition should draw layers in reverse order.
+Layer order is top-to-bottom as it should appear in Photoshop. Preview composition should draw layers in reverse order. `write_layered_psd.js` also reverses this list at PSD serialization time because PSD writer order is opposite to the layer panel order shown by Photoshop/Photopea.
 
 Fields:
 
