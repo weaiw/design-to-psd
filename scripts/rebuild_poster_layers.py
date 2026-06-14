@@ -128,6 +128,54 @@ def crop_layer(source: Image.Image, box, mask_kind: str, canvas_size, opacity=1.
     return layer
 
 
+def validate_crop_plan(crop_specs: list[str], canvas_size: tuple[int, int], allow_rect_slices: bool = False):
+    if allow_rect_slices:
+        return
+
+    width, height = canvas_size
+    canvas_area = width * height
+    rect_area = 0
+    rect_count = 0
+    problems = []
+
+    for spec in crop_specs:
+        fields = spec.split("|")
+        if len(fields) < 3:
+            continue
+        name = fields[0]
+        box = parse_box(fields[1])
+        mask = fields[2]
+        w = max(0, box[2] - box[0])
+        h = max(0, box[3] - box[1])
+        area_ratio = (w * h) / canvas_area if canvas_area else 0
+
+        if mask in {"rect", "soft-rect"}:
+            rect_count += 1
+            rect_area += w * h
+            if area_ratio > 0.08:
+                problems.append(f"{name}: {mask} crop covers {area_ratio:.1%} of canvas")
+            if w / width > 0.55 and h / height > 0.06:
+                problems.append(f"{name}: wide rectangular band detected")
+            if h / height > 0.30 and w / width > 0.20:
+                problems.append(f"{name}: tall rectangular chunk detected")
+
+    if rect_count > 4:
+        problems.append(f"{rect_count} rectangular crop layers detected")
+    if rect_area / canvas_area > 0.24:
+        problems.append(f"rectangular crops cover {rect_area / canvas_area:.1%} of the canvas")
+
+    if problems:
+        detail = "\n  - ".join(problems)
+        raise SystemExit(
+            "Anti-slicing QA failed. This looks like a tiled/chunked source reconstruction, "
+            "not an editable design-to-PSD rebuild.\n"
+            f"  - {detail}\n"
+            "Rebuild backgrounds, text, simple shapes, and line art as separate layers. "
+            "Use foreground/ellipse masks only for complex bitmap subjects. "
+            "Pass --allow-rect-slices only for an explicit sliced-reference PSD."
+        )
+
+
 def make_background(source: Image.Image) -> Image.Image:
     small = source.convert("RGBA").resize((max(1, source.width // 12), max(1, source.height // 12)), Image.Resampling.BILINEAR)
     bg = small.resize(source.size, Image.Resampling.BICUBIC).filter(ImageFilter.GaussianBlur(28))
@@ -214,6 +262,7 @@ def main():
     parser.add_argument("--text-layer", action="append", default=[], help="name|text|x,y|size|font|r,g,b|tracking|line_gap")
     parser.add_argument("--label-layer", action="append", default=[], help="name|text|x0,y0,x1,y1|size|font|r,g,b")
     parser.add_argument("--no-background", action="store_true")
+    parser.add_argument("--allow-rect-slices", action="store_true", help="Disable anti-slicing QA for explicit sliced-reference PSDs.")
     args = parser.parse_args()
 
     out_dir = Path(args.out_dir)
@@ -226,6 +275,7 @@ def main():
     source.save(out_dir / "source.png")
     manifest = {"width": source.width, "height": source.height, "preview": "preview.png", "layers": []}
     canvas_size = (source.width, source.height)
+    validate_crop_plan(args.crop_layer, canvas_size, allow_rect_slices=args.allow_rect_slices)
 
     reference = source.copy()
     reference.putalpha(reference.getchannel("A").point(lambda p: int(p * 0.35)))

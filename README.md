@@ -19,6 +19,8 @@ The workflow is code-based and does not require Photoshop:
 2. Use Node.js, `ag-psd`, and `pngjs` to package those transparent PNG layers into a PSD.
 3. Validate the PSD by reading it back and visually checking the preview.
 
+The Skill is intentionally not a slicer. It rejects large rectangular crop bands by default because a useful PSD should rebuild backgrounds, text, line art, badges, and simple shapes as editable layers. Bitmap extraction is reserved for complex subjects such as people, products, food, illustrations, handwriting, logos, or textured objects.
+
 ## Install as a Codex Skill
 
 Copy this folder into your Codex skills directory:
@@ -64,6 +66,8 @@ node scripts/write_layered_psd.js out/layer_manifest.json out/recreated.psd
 ## Limits
 
 This does not recover the original design source file. Complex illustration, photography, gradients, lighting, and custom lettering are approximated with extracted bitmap layers or reconstructed layers. Text layers include raster previews plus PSD text metadata where possible, but PSD text compatibility varies by app.
+
+If you explicitly need a sliced-reference PSD, pass `--allow-rect-slices`. Do not use that mode for normal design reconstruction.
 
 ## License
 
