@@ -1,0 +1,17 @@
+.DS_Store
+node_modules/
+__pycache__/
+*.pyc
+
+# Generated reconstruction outputs
+out/
+layers/
+source.png
+preview.png
+recreated.psd
+layer_manifest.json
+NOTES.md
+
+# Local scratch
+*.tmp
+*.log

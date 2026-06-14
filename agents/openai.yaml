@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design to PSD"
+  short_description: "Rebuild flat designs into layered PSD files"
+  default_prompt: "Use $design-to-psd to turn this design image into a layered PSD with preview PNGs."

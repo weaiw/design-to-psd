@@ -1,0 +1,15 @@
+{
+  "name": "design-to-psd",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Codex Skill and scripts for rebuilding flat design images into layered PSD files.",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "write-psd": "node scripts/write_layered_psd.js"
+  },
+  "dependencies": {
+    "ag-psd": "^28.1.0",
+    "pngjs": "^7.0.0"
+  }
+}
