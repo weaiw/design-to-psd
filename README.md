@@ -23,11 +23,15 @@ The Skill is intentionally not a slicer. It rejects large rectangular crop bands
 
 ## Install as a Codex Skill
 
-Copy this folder into your Codex skills directory:
+Clone the repo and copy it into your Codex skills directory:
 
 ```bash
-cp -R design-to-psd ~/.codex/skills/design-to-psd
+git clone https://github.com/weaiw/design-to-psd.git
+mkdir -p "$HOME/.codex/skills"
+cp -R ./design-to-psd "$HOME/.codex/skills/design-to-psd"
 ```
+
+`$HOME/.codex/skills` means the installing user's local Codex skills directory. It is not a maintainer-specific path.
 
 Then invoke it with:
 
